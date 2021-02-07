@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <head>
+        <title>Plot Statistics</title>
+        <style>
+            .error {
+                color: red;
+            }
+            body {
+                background-color: lightblue;
+            }
+            .main {
+                background-color: darkseagreen;
+                width: 90%;
+                margin: auto;
+                border: 3px solid green;
+                padding: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: column;
+            }
+            .linkBox {
+                display: flex;
+                flex-direction: row;
+                flex: 1 1 auto;
+            }
+            a {
+                flex: auto;
+            }
+            a:link,
+            a:visited {
+                background-color: #a44336;
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                padding: 10px;
+            }
+            a:hover,
+            a:active {
+                background-color: red;
+            }
+            .link {
+                margin: 10px;
+            }
+            #vis{
+                margin: auto;
+            }
+        </style>
+    </head>
+    <div class="main" id="main">
+        <div id="gameBoard">
+            <button id="red" onclick="return trykk(this.id)">Rød</button>
+            <button id="blue" onclick="return trykk(this.id)">Blå</button>
+            <button id="yellow" onclick="return trykk(this.id)">Gul</button>
+            <button id="green" onclick="return trykk(this.id)">Grønn</button>
+        </div>
+    </div>
+    <script>
+        function trykk(id){
+            console.log(JSON.stringify(id));
+            send(id);
+            return false;
+        };
+        async function send(varibel){
+            var responce = await fetch('/answer.json', {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(varibel),
+            });
+            if (responce.ok != true){
+                console.warn(responce);
+            }
+        };
+    </script>
+</body>
+
+</html>

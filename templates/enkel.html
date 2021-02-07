@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Snake</title>
+    <style>
+        body{
+            background-color: black;
+        }
+        #infoTop{
+            width: 100%;
+            background-color: darkgrey;
+            color: white;
+            padding: 10px;
+            display: flex;
+            flex-direction: row;
+        }
+        #rutenett {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .rad{
+            flex: 1;
+        }
+        .spillKnapp{
+            background-color: #f44336; /* Red */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 50px;
+            width: 100%;
+            height: 100%;
+        }
+        .spillKnapp:active {
+            background-color: #3e8e41;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="message_holder"></div>
+    
+    
+    <div id="inputBrukernavnBox">
+        <form id="brukernavn" action="#" method="POST">
+            <input id="inpUsername" type="text" class="username" placeholder="User Name" />
+            <input type="submit" />
+        </form>
+    </div>
+    
+    <div id="infoTop" style="display: none">
+        <div><h3 id="infoTopNavn">Test</h3></div>
+        <div style="position: absolute; right: 10px;"><h3 id="indoTopPoeng">9090</h3></div>
+    </div>
+    
+    <div id="rutenett" style="display: none" class="kontroller">
+        <div class="rad">
+            <div class="box">1</div>
+            <div class="box">
+                <button id="left" class="spillKnapp" onclick="return trykk(this.id)">&larr;</button>
+            </div>
+            <div class="box">3</div>
+        </div>
+        <div class="rad">
+            <div class="box">
+                <button id="up" class="spillKnapp" onclick="return trykk(this.id)">&uarr;</button>
+            </div>
+            <div class="box">5</div>
+            <div class="box">
+                <button id="down" class="spillKnapp" onclick="return trykk(this.id)">&darr;</button>
+            </div>
+        </div>
+        <div class="rad">
+            <div class="box">7</div>
+            <div class="box">
+                <button id="right" class="spillKnapp" onclick="return trykk(this.id)">&rarr;</button>
+            </div>
+            <div class="box">9</div>
+        </div>
+    </div>
+    
+    <div style="display: none">
+        <button id="red" onclick="return trykk(this.id)">Rød</button>
+        <button id="blue" onclick="return trykk(this.id)">Blå</button>
+        <button id="yellow" onclick="return trykk(this.id)">Gul</button>
+        <button id="green" onclick="return trykk(this.id)">Grønn</button>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script>
+        function innretting(klasse){
+            var alleBoxer = document.getElementsByClassName(klasse);
+            var height = getComputedStyle(alleBoxer[0], "width").width;
+            console.log(height);
+            //var height = alleBoxer[0].getPropertyValue("width");
+            for(var i = 0; i<alleBoxer.length; i++){
+                alleBoxer[i].style.height = height;
+            }
+            console.log("Ferdig");
+        };
+        
+        var sjema = document.getElementById("brukernavn");
+        var inpNavn = document.getElementById("inpUsername");
+        var infoTop = document.getElementById("infoTop");
+        var rutenett = document.getElementById("rutenett");
+        var inputBrukernavnBox = document.getElementById("inputBrukernavnBox");
+        var infoTopNavn = document.getElementById("infoTopNavn");
+        sjema.onsubmit = function(evt){
+            evt.preventDefault();
+            if(inpNavn.value == ""){
+                alert("Du må skrive inn et navn");
+                return;
+            }
+            inpNavn.disabled = true;
+            inputBrukernavnBox.style.display = "none";
+            infoTopNavn.innerHTML=inpNavn.value;
+            startKontroller(0);
+        }
+        
+        function startKontroller(nummer){
+            infoTop.style.display = "flex";
+            var alleBoxer = document.getElementsByClassName("kontroller");
+            for(var i = 0; i<alleBoxer.length; i++){
+                alleBoxer[i].style.display = "none";
+            }
+            alleBoxer[nummer].style.display = "flex";
+            innretting("box");
+        }
+    </script>
+    <script type="text/javascript">
+        //Skal bli flyttet til der man logger inn 
+        //Skal også sende farge når man logger inn 
+        //Trenger en enegn lage ny spiller funksjon
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('connect', function () {
+            socket.emit('my event', {
+                    data: 'User Connected'
+                })
+            /*
+            var form = $('form').on('submit', function (e) {
+                e.preventDefault()
+                let user_name = $('input.username').val()
+                let user_input = $('input.message').val()
+                socket.emit('my event', {
+                    user_name: user_name
+                    , message: user_input
+                })
+                $('input.message').val('').focus()
+            })*/
+        })
+        
+        function trykk(id){
+            socket.emit('kommando', {
+                user_name: inpNavn.value, 
+                message: id
+            })
+        }
+        
+        $('#red').click(function () {
+            socket.emit('kommando', {
+                user_name: "test"
+                , message: "red"
+            });
+        });
+        socket.on('my response', function (msg) {
+            console.log(msg)
+            if (typeof msg.user_name !== 'undefined') {
+                $('h3').remove()
+                $('div.message_holder').append('<div><b style="color: #000">' + msg.user_name + '</b> ' + msg.message + '</div>')
+            }
+        })
+    </script>
+    <script>
+        window.onbeforeunload = function () {
+            socket.emit('disconnect', {
+                'username': localStorage.getItem('username')
+            });
+        }
+    </script>
+    -->
+</body>
+
+</html>
